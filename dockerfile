@@ -2,6 +2,7 @@
 FROM python:3.10
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+VOLUME D:\Development\RESEARCH\FULL-STACK-DEVELOPMENT\DOCKER\fhuea939af03h
 WORKDIR /code
 COPY requirements.txt /code/
 run pip install --upgrade pip

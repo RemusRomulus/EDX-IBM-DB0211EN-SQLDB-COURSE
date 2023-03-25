@@ -120,6 +120,9 @@ class Question(models.Model):
     grade_pt = models.IntegerField(null=False, default=0)
     question_text = models.CharField(max_length=256)
 
+    def __str__(self):
+        return 'Course-{}: {} ({})'.format(self.course.name, self.question_text, self.grade_pt)
+
     def is_get_score(self, selected_ids):
         all_answers = self.choices.filter(is_correct=True).count()
         selected_correct = self.choices.filter(is_correct=True, id__in=selected_ids).count()
@@ -151,6 +154,9 @@ class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
     choices = models.CharField(max_length=6, choices=CHOICE_OPTIONS, default=NONE)
     is_correct = models.CharField(default='N', max_length=1)
+
+    def __str__(self):
+        return 'Question-{}: {} ({})'.format(self.question.question_text, self.choices, self.is_correct)
 
 
 # <HINT> The submission model
