@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 # <HINT> Import any new Models here
-from .models import Course, Enrollment
+from .models import Course, Enrollment, Question, Choice, Submission
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -110,7 +110,34 @@ def enroll(request, course_id):
          # Collect the selected choices from exam form
          # Add each selected choice object to the submission object
          # Redirect to show_exam_result with the submission id
-#def submit(request, course_id):
+def submit_exam(request, course_id):
+    def extract_answers(request):
+        print(request.POST)
+        submitted_answers = []
+        for key in request.POST:
+           if key.startswith('choice'):
+               value = request.POST[key]
+               # choice_id = int(value)
+               choice_id = value
+               submitted_answers.append(choice_id)
+        return submitted_answers
+
+
+
+    course = get_object_or_404(Course, pk=course_id)
+    user = request.user
+    enrollments = Enrollment.objects.filter(user=user, course=course)
+    choices = None
+    new_sub_id = None
+    for enrollment in enrollments:
+        print(enrollment)
+        choices = extract_answers(request=request)
+        logger.info(choices)
+        new_submission = Submission.objects.create(enrollment=enrollment, choices=choices)
+        new_sub_id = new_submission.id
+
+    print(choices)
+    show_exam_result(request=request, course_id=course_id, submission_id=new_sub_id, choices_in=choices)
 
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
@@ -130,7 +157,8 @@ def enroll(request, course_id):
         # Get the selected choice ids from the submission record
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
-#def show_exam_result(request, course_id, submission_id):
+def show_exam_result(request, course_id, submission_id, choices_in):
+    return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=()))
 
 
 
