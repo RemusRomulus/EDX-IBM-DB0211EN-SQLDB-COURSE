@@ -31,9 +31,12 @@ class LessonAdmin(admin.ModelAdmin):
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [ChoiceInline]
     list_display = ('question_text', 'grade_pt')
+    list_filter = ['course__name', 'grade_pt', 'question_text', 'course__pub_date', 'course__total_enrollment']
 
 class ChoiceAdmin(admin.ModelAdmin):
     list_display = ('question', 'choices', 'is_correct')
+    list_filter = ['question', 'question__course__name', 'is_correct', 'question__question_text']
+    search_fields = ['is_correct', 'question__course__name', 'question__question_text']
 
 
 admin.site.register(Course, CourseAdmin)
