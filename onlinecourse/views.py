@@ -126,15 +126,13 @@ def submit_exam(request, course_id):
 
     course = get_object_or_404(Course, pk=course_id)
     user = request.user
-    enrollments = Enrollment.objects.filter(user=user, course=course)
-    choices = None
-    new_sub_id = None
-    for enrollment in enrollments:
-        print(enrollment)
-        choices = extract_answers(request=request)
-        logger.info(choices)
-        new_submission = Submission.objects.create(enrollment=enrollment, choices=choices)
-        new_sub_id = new_submission.id
+    enrollments = Enrollment.objects.filter(user=user, course=course).first()
+    print(enrollments)
+    choices = extract_answers(request=request)
+    print(choices)
+    # choice_model = Choice.objects.filter(id=choices[0]).first()
+    new_submission = Submission.objects.create(enrollment=enrollments)
+    new_sub_id = new_submission.id
 
     print(choices)
     show_exam_result(request=request, course_id=course_id, submission_id=new_sub_id, choices_in=choices)
@@ -158,7 +156,23 @@ def submit_exam(request, course_id):
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
 def show_exam_result(request, course_id, submission_id, choices_in):
-    return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=()))
+    context = {}
+
+    correct_choices = Choice.objects.filter(is_correct=Choice.Y, question__course__id=course_id)
+    correct_choice_ids = [x.id for x in correct_choices]
+    yeses = 0
+    noes = 0
+    for idx in correct_choice_ids:
+        if idx in choices_in:
+            yeses += 1
+        else:
+            noes += 1
+    grade = yeses / float(len(correct_choice_ids))
+
+
+
+
+    return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(submission_id,)))
 
 
 

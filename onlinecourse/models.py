@@ -95,8 +95,8 @@ class Enrollment(models.Model):
     rating = models.FloatField(default=5.0)
 
     def __str__(self):
-        return 'Enrollment: u({}), course({}), m({})'.format(self.user.name,
-                                                             self.course.username,
+        return 'Enrollment: u({}), course({}), m({})'.format(self.user.username,
+                                                             self.course.name,
                                                              self.mode)
 
 
@@ -124,15 +124,22 @@ class Choice(models.Model):
     MID = '50'
     MORE = '75'
     ALL = '100'
+    Y = 'Y'
+    N = 'N'
     CHOICE_OPTIONS = [
         (NONE, '0 %'), (LESS, '25 %'),
         (MID, '50 %'), (MORE, '75 %'),
         (ALL, '100 %')
     ]
+    ANSWER_OPTIONS = [
+        (Y, 'Y'),
+        (N, 'N')
+    ]
+
     id = models.UUIDField(primary_key=True, null=False, default=uuid.uuid4, editable=False)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
     choices = models.CharField(max_length=6, choices=CHOICE_OPTIONS, default=NONE)
-    is_correct = models.CharField(default='N', max_length=1)
+    is_correct = models.CharField(default=N, max_length=1, choices=ANSWER_OPTIONS)
 
     def __str__(self):
         return 'Question-{}: {} ({})'.format(self.question.question_text, self.choices, self.is_correct)
