@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 # <HINT> Import any new Models here
 from .models import Course, Enrollment, Question, Choice, Submission
 from django.contrib.auth.models import User
@@ -133,7 +133,7 @@ def submit_exam(request, course_id):
     new_sub_id = new_submission.id
 
     # print(choices)
-    return show_exam_result(request, new_sub_id)
+    return render(show_exam_result(request, new_sub_id))
 
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
@@ -165,8 +165,13 @@ def show_exam_result(request, submission_id):
     '''
     context = {}
 
-    correct_choices = Choice.objects.filter(is_correct=Choice.Y, question__course__id=course_id)
+    # Get Course ID
+    course = Course.objects.filter(enrollment__submission__pk=submission_id).first()
+
+    correct_choices = Choice.objects.filter(is_correct=Choice.Y, question__course__pk=course.id)
     correct_choice_ids = [x.id for x in correct_choices]
+    choices = Choice.objects.filter(submission__pk=submission_id)
+    choices_in = [x.id for x in choices]
     yeses = 0
     noes = 0
     for idx in correct_choice_ids:
@@ -176,7 +181,7 @@ def show_exam_result(request, submission_id):
             noes += 1
     grade = yeses / float(len(correct_choice_ids))
 
-    return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(submission_id,)))
+    return HttpResponse(reverse(viewname='onlinecourse:exam_result', args=(submission_id,)))
 
 
 
