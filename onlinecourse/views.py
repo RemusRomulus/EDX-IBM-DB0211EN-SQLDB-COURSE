@@ -122,20 +122,18 @@ def submit_exam(request, course_id):
                submitted_answers.append(choice_id)
         return submitted_answers
 
-
-
     course = get_object_or_404(Course, pk=course_id)
     user = request.user
     enrollments = Enrollment.objects.filter(user=user, course=course).first()
     print(enrollments)
-    choices = extract_answers(request=request)
-    print(choices)
+    # choices = extract_answers(request=request)
+    # print(choices)
     # choice_model = Choice.objects.filter(id=choices[0]).first()
     new_submission = Submission.objects.create(enrollment=enrollments)
     new_sub_id = new_submission.id
 
-    print(choices)
-    show_exam_result(request=request, course_id=course_id, submission_id=new_sub_id, choices_in=choices)
+    # print(choices)
+    return show_exam_result(request, new_sub_id)
 
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
@@ -155,7 +153,16 @@ def submit_exam(request, course_id):
         # Get the selected choice ids from the submission record
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
-def show_exam_result(request, course_id, submission_id, choices_in):
+def show_exam_result(request, submission_id):
+    '''
+    This link explains SO MUCH about weird positional arguments errors:
+        https://stackoverflow.com/a/38934363/4901647
+        The idea is that the func signature can ONLY have the same number of args and the same args that
+        ... go into the REDIRECT return
+    :param request:
+    :param submission_id:
+    :return:
+    '''
     context = {}
 
     correct_choices = Choice.objects.filter(is_correct=Choice.Y, question__course__id=course_id)
@@ -168,9 +175,6 @@ def show_exam_result(request, course_id, submission_id, choices_in):
         else:
             noes += 1
     grade = yeses / float(len(correct_choice_ids))
-
-
-
 
     return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(submission_id,)))
 
