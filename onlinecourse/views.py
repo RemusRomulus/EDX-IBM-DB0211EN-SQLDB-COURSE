@@ -132,8 +132,10 @@ def submit_exam(request, course_id):
     new_submission = Submission.objects.create(enrollment=enrollments)
     new_sub_id = new_submission.id
 
-    # print(choices)
-    return render(show_exam_result(request, new_sub_id))
+    # exam_results = str(show_exam_result(request, new_sub_id))
+    # print(exam_results)
+    # return render(request, exam_results)
+    return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(course_id, new_sub_id)))
 
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
@@ -153,7 +155,7 @@ def submit_exam(request, course_id):
         # Get the selected choice ids from the submission record
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
-def show_exam_result(request, submission_id):
+def show_exam_result(request, course_id, submission_id):
     '''
     This link explains SO MUCH about weird positional arguments errors:
         https://stackoverflow.com/a/38934363/4901647
@@ -181,7 +183,7 @@ def show_exam_result(request, submission_id):
             noes += 1
     grade = yeses / float(len(correct_choice_ids))
 
-    return HttpResponse(reverse(viewname='onlinecourse:exam_result', args=(submission_id,)))
-
-
+    # return render(reverse(viewname='onlinecourse:exam_result', args=(course_id, submission_id,)))
+    return render(request, 'onlinecourse/exam_result_bootstrap.html', context={'course_id': course_id, 'submission_id': submission_id})
+    # return redirect('onlinecourse:exam_result', course_id=course_id, submission_id=submission_id)
 
