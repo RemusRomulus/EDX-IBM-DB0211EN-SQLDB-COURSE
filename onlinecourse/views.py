@@ -183,15 +183,16 @@ def show_exam_result(request, course_id, submission_id):
     noes = 0
     for q in questions:
         q_choices = Choice.objects.filter(question__id=q.id, is_correct=Choice.Y)
-        num_correct_options = len(q_choices)
-        # ex_choices = [x.choices for x in choices if x.question.id == q.id]
+        q_ids = [x.id for x in q_choices]
         ex_choices = Choice.objects.filter(question=q, submission__pk=submission_id)
+        ex_ids = [x.id for x in ex_choices]
         num_user_correct = len(ex_choices)
+        num_correct_options = len(q_choices)
         print('Question', q, '\n------\n', 'q_choices:', q_choices, '\n', 'ex_choices:', ex_choices, '\n\n\n----------')
 
         tmp_correct = False
         print(num_correct_options, num_user_correct)
-        if num_correct_options == num_user_correct:
+        if num_correct_options == num_user_correct and sorted(q_ids) == sorted(ex_ids):
             yeses += 1
             tmp_correct = True
         else:
@@ -199,7 +200,7 @@ def show_exam_result(request, course_id, submission_id):
         data[q.question_text] = {'pass': tmp_correct,
                                  'answers': ex_choices}
 
-    grade = sum([1 for x in data if data[x]['pass']]) / float(len(questions)) * 100
+    grade = round(sum([1 for x in data if data[x]['pass']]) / float(len(questions)) * 100, 3)
 
     print(grade, yeses, noes, data)
 
