@@ -126,10 +126,13 @@ def submit_exam(request, course_id):
     user = request.user
     enrollments = Enrollment.objects.filter(user=user, course=course).first()
     print(enrollments)
-    # choices = extract_answers(request=request)
-    # print(choices)
+    choices = extract_answers(request=request)
+    print(choices)
     # choice_model = Choice.objects.filter(id=choices[0]).first()
     new_submission = Submission.objects.create(enrollment=enrollments)
+    for item in choices:
+        tmp_choice = Choice.objects.filter(id=item).first()
+        new_submission.choices.add(tmp_choice)
     new_sub_id = new_submission.id
 
     # exam_results = str(show_exam_result(request, new_sub_id))
@@ -165,7 +168,7 @@ def show_exam_result(request, course_id, submission_id):
     :param submission_id:
     :return:
     '''
-    context = {}
+    data = {}
 
     # Get Course ID
     course = Course.objects.filter(enrollment__submission__pk=submission_id).first()
@@ -174,6 +177,7 @@ def show_exam_result(request, course_id, submission_id):
     correct_choice_ids = [x.id for x in correct_choices]
     choices = Choice.objects.filter(submission__pk=submission_id)
     choices_in = [x.id for x in choices]
+    print(correct_choices, '\n\n', correct_choice_ids, '\n\n', choices, '\n\n', choices_in)
     yeses = 0
     noes = 0
     for idx in correct_choice_ids:
@@ -182,8 +186,12 @@ def show_exam_result(request, course_id, submission_id):
         else:
             noes += 1
     grade = yeses / float(len(correct_choice_ids))
+    grade = 90
+    print(grade, yeses, noes)
 
-    # return render(reverse(viewname='onlinecourse:exam_result', args=(course_id, submission_id,)))
-    return render(request, 'onlinecourse/exam_result_bootstrap.html', context={'course_id': course_id, 'submission_id': submission_id})
+    return render(request, 'onlinecourse/exam_result_bootstrap.html', context={'course_id': course_id,
+                                                                               'submission_id': submission_id,
+                                                                               'grade': grade
+                                                                               })
     # return redirect('onlinecourse:exam_result', course_id=course_id, submission_id=submission_id)
 
