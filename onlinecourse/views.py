@@ -177,21 +177,36 @@ def show_exam_result(request, course_id, submission_id):
     correct_choice_ids = [x.id for x in correct_choices]
     choices = Choice.objects.filter(submission__pk=submission_id)
     choices_in = [x.id for x in choices]
+    questions = Question.objects.filter(course__pk=course_id)
     print(correct_choices, '\n\n', correct_choice_ids, '\n\n', choices, '\n\n', choices_in)
     yeses = 0
     noes = 0
-    for idx in correct_choice_ids:
-        if idx in choices_in:
+    for q in questions:
+        q_choices = Choice.objects.filter(question__id=q.id, is_correct=Choice.Y)
+        num_correct_options = len(q_choices)
+        # ex_choices = [x.choices for x in choices if x.question.id == q.id]
+        ex_choices = Choice.objects.filter(question=q, submission__pk=submission_id)
+        num_user_correct = len(ex_choices)
+        print('Question', q, '\n------\n', 'q_choices:', q_choices, '\n', 'ex_choices:', ex_choices, '\n\n\n----------')
+
+        tmp_correct = False
+        print(num_correct_options, num_user_correct)
+        if num_correct_options == num_user_correct:
             yeses += 1
+            tmp_correct = True
         else:
             noes += 1
-    grade = yeses / float(len(correct_choice_ids))
-    grade = 90
-    print(grade, yeses, noes)
+        data[q.question_text] = {'pass': tmp_correct,
+                                 'answers': ex_choices}
+
+    grade = sum([1 for x in data if data[x]['pass']]) / float(len(questions)) * 100
+
+    print(grade, yeses, noes, data)
 
     return render(request, 'onlinecourse/exam_result_bootstrap.html', context={'course_id': course_id,
                                                                                'submission_id': submission_id,
-                                                                               'grade': grade
+                                                                               'grade': grade,
+                                                                               'data': data
                                                                                })
     # return redirect('onlinecourse:exam_result', course_id=course_id, submission_id=submission_id)
 
