@@ -47,7 +47,20 @@
             {% endif %}
             <div class="card-columns-vertical mt-1">
                 <h5 class="">Exam results</h5>
-                    <!--HINT Display exam results-->
+                {% for question in data %}
+                <div class="card mt-1">
+                    <div class="card-header"><h5>{{ question.question_text }}</h5></div>
+                    <div class="card-body">
+                        {% for choice in question.choices.all %}
+                            {% if choice.choices.is_correct == 'True' %}
+                                <p class="card-text text-success">Correct Answer: {{ choice.choices }}</p>
+                            {% else %}
+                                <p class="card-text text-muted">{{ choice.choices }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </body>

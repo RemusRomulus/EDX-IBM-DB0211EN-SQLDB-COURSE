@@ -169,6 +169,7 @@ def show_exam_result(request, course_id, submission_id):
     :return:
     '''
     data = {}
+    data_out = []
 
     # Get Course ID
     course = Course.objects.filter(enrollment__submission__pk=submission_id).first()
@@ -197,8 +198,10 @@ def show_exam_result(request, course_id, submission_id):
             tmp_correct = True
         else:
             noes += 1
-        data[q.question_text] = {'pass': tmp_correct,
-                                 'answers': ex_choices}
+        data[q.id] = {'pass': tmp_correct,
+                      'answers': ex_choices,
+                      'text': q.question_text}
+        data_out.append(q)
 
     grade = round(sum([1 for x in data if data[x]['pass']]) / float(len(questions)) * 100, 3)
 
@@ -207,7 +210,7 @@ def show_exam_result(request, course_id, submission_id):
     return render(request, 'onlinecourse/exam_result_bootstrap.html', context={'course_id': course_id,
                                                                                'submission_id': submission_id,
                                                                                'grade': grade,
-                                                                               'data': data
+                                                                               'data': data_out
                                                                                })
     # return redirect('onlinecourse:exam_result', course_id=course_id, submission_id=submission_id)
 
