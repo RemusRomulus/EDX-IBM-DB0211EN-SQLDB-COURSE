@@ -140,9 +140,11 @@ class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
     choices = models.CharField(max_length=6, choices=CHOICE_OPTIONS, default=NONE)
     is_correct = models.CharField(default=N, max_length=1, choices=ANSWER_OPTIONS)
+    user_selected = models.CharField(default=N, max_length=1, choices=ANSWER_OPTIONS)
 
     def __str__(self):
-        return 'Question-{}: {} ({})'.format(self.question.question_text, self.choices, self.is_correct)
+        return 'Question-{}: {} ({}). Selected: {}'.format(self.question.question_text, self.choices,
+                                                           self.is_correct, self.user_selected)
 
 
 # <HINT> The submission model

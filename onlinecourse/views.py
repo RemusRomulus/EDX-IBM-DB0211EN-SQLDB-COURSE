@@ -135,6 +135,13 @@ def submit_exam(request, course_id):
         new_submission.choices.add(tmp_choice)
     new_sub_id = new_submission.id
 
+    for choice in Choice.objects.all():
+        print(choice.id)
+        if str(choice.id) in choices:
+            Choice.objects.filter(id=choice.id).update(user_selected=Choice.Y)
+        else:
+            Choice.objects.filter(id=choice.id).update(user_selected=Choice.N)
+        print('Setting user_selected: ', choice)
     # exam_results = str(show_exam_result(request, new_sub_id))
     # print(exam_results)
     # return render(request, exam_results)
